@@ -1,7 +1,0 @@
-services:
-  test:
-    build: .
-    container_name: test_container
-    restart : always
-    ports:
-      - "6969"

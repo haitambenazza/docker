@@ -13,3 +13,7 @@ docker vs virtualization<br>
 what is container<br>
 what is container engine<br>
 how does the container engine isolate running processes (namespaces)<br>
+what is the runtime, engine, orchestrator docker <br>
+what are the Docker levels <br>
+how does the docker operates on the low (runc) & high(containerd) level <br>
+what is dockerd<br>
