@@ -7,6 +7,28 @@ Docker engine : is the software that run and manages the containers or simply re
         stuff like namespaces but after 2014 Docker replaces LXC with it's own library called libcontainer (part of runc) since
         LXC relies on linux based System
 
+docker image: it's a read only package that has everything to build the app, they are made of stacked layers, those layers represent
+    the minimal OS, the dependacies , the app code and the config file, you can also say that images are stopped containers.
+    - usually they are stored in /var/lib/docker/
+    - to check for images in the local host : "docker images" or "docker image ls"
+    these images can be either built or pulled from registeries like DockerHub by running "docker pull <image>", also you can search 
+    an image using "docker search <image>", you can inspect and see the layers of an image while pulling or running "docker insepct <image>"
+    deleting image: 
+        - to delete an image we use "docker rmi <image>", however if an container uses that image it will not be deleted
+        - to delete all the images on a host "docker rmi $(docker images -q) -f"
+
+docker container: if the image is the template or the 'class' then container is the instance, it's the runtime instance of an image
+        - to start a container we run "docker run <image> <app/executable/script>".
+            the container will run untill the main app exits, or by stoping it by running "docker stop <container ID>" 
+            you can also remove a container by running "docker rm <container ID>"
+
+        - so far we can define the container as next: container = Image(Read-only) + writtable Layer+ Isolated process
+            and for the writtable layer if you stop the container or the process exited, all the data in that layer will be lost,
+            that's why we need to write them into volume.
+        - difference between container and VM machine:
+            - as we used to do with VM, the VM machine needs a host machine and a hypervisor, when the hypervisor boots it claims
+            all the CPU
+
 OCI (Open Container Initiative) is set of rules that describe how should containers and images be build
     3 main rules of OCI:
         - image specs: it define what should be inside a container image file 
@@ -32,10 +54,6 @@ The OCI workflow
         - Execute runc: after preparing the layers, it run "runc", once runc exists the containerd leave a small process called shim to keep
         watching the running container and report if it crashes or existed with an error code.
         - Metadata: keep tracking the containers ,which one is running, their IDs, which image they're using.
-
-- so so far we can define the container as next: container = Image(Read-only) + writtable Layer+ Isolated process
-    and for the writtable layer if you stop the container or the process exited, all the data in that layer will be lost,
-    that's why we need to write them into volume.
 
 - runc is a standalone CLI to run the containers according to OCI runtime specs by calling a set of syscalls (clone(), pivot_root()...)
     to transfrom the standard process into container (or isolated process)
