@@ -1,0 +1,51 @@
+Docker engine : is the software that run and manages the containers or simply refered as Docker
+    and it's made from many components (The API, Image builder, High level runtime, Low level runtime)
+    when the docker was released it was made of two major components:
+        - docker deamon (dockerd): contains the code for the API, image builder, runtime and more...
+        - LCX (linux container): set of tools that allowes you create System containers, combine namespaces and cgroups into
+        one set. in another word docker engine hanlde high level stuff like API, image build while LXC handles the low level
+        stuff like namespaces but after 2014 Docker replaces LXC with it's own library called libcontainer (part of runc) since
+        LXC relies on linux based System
+
+OCI (Open Container Initiative) is set of rules that describe how should containers and images be build
+    3 main rules of OCI:
+        - image specs: it define what should be inside a container image file 
+            - Manifest: a JSON file listing configs and layers
+            - The Layers: Tarballs of the actual filesystem changes
+            - The configs: a JSON file containing the env variables and the commands to run
+        - the runtime specs: this defines how should a container started and managed
+        - distribution specs: this describes how should images be pushed and pulled from registeries like DockerHub
+
+The OCI workflow
+    - docker run nginx (docker engine or deamon finds the requested image by docker CLI)
+    - docker then tells containerD to handle the lifecycle, containerD pulls the The OCI image and pack it 
+    into OCI bundle (a folder in the disk)
+    - containerD calls runc to initiate the container
+    - runc reads the config.json from The OCI bundle then makes the syscalls needed to create namespaces the cgroups 
+
+- containerD is a high-level runtime , it takes abstracted commands from docker (by Docker CLI) and turn them into OCI bundle for runc
+    also it's the one that manage and monitor the running containers
+    containerd has 3 responsabilities:
+        - Image management: handles push and pull, communicate with registeries like DockerHub, download layers and store them into the disk
+        - Monitoring: it manages the "Union Filesystem" ,it's reads the layers from an image (Read-only),stack them on each and then add a 
+        writable layer if the process tries to make a new file or to edit an existed one.
+        - Execute runc: after preparing the layers, it run "runc", once runc exists the containerd leave a small process called shim to keep
+        watching the running container and report if it crashes or existed with an error code.
+        - Metadata: keep tracking the containers ,which one is running, their IDs, which image they're using.
+
+- so so far we can define the container as next: container = Image(Read-only) + writtable Layer+ Isolated process
+    and for the writtable layer if you stop the container or the process exited, all the data in that layer will be lost,
+    that's why we need to write them into volume.
+
+- runc is a standalone CLI to run the containers according to OCI runtime specs by calling a set of syscalls (clone(), pivot_root()...)
+    to transfrom the standard process into container (or isolated process)
+    workflow of runc:
+        - Read the config file: parse config.json to see which namespaces requested(PID, Network, Mount...).
+        - Create namespaces: uses unshare() to run the program in a new namespaces and clone() syscall to abstracts 
+        the process from the rest (basically assigning PID 1).
+        - setup Cgroups: writes new PID into cgroups.proc file a new created control blocks, basically handcuffing the process
+        - remove the permissions: basically removes and strips down any previlidged commands or root power.
+        - Exec : finally it replaces itself with the actual command you wanted to execute.
+    it is possibile to go very low and run the "runc" command without docker or containerd.
+
+- cgroups are a kernel feature that allows you to allocate resources like tasks (CPU,RAM,GPU...)
