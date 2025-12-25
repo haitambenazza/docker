@@ -18,7 +18,7 @@ docker image: it's a read only package that has everything to build the app, the
         - to delete all the images on a host "docker rmi $(docker images -q) -f"
 
 docker container: if the image is the template or the 'class' then container is the instance, it's the runtime instance of an image
-        - to start a container we run "docker run <image> <app/executable/script>".
+        - to start a container we run "docker run <image> <app/executable/script>" you can specify name with flag --name.
             the container will run untill the main app exits, or by stoping it by running "docker stop <container ID>" 
             you can also remove a container by running "docker rm <container ID>"
 
@@ -27,7 +27,10 @@ docker container: if the image is the template or the 'class' then container is 
             that's why we need to write them into volume.
         - difference between container and VM machine:
             - as we used to do with VM, the VM machine needs a host machine and a hypervisor, when the hypervisor boots it claims
-            all the CPU
+            all the CPU,RAM,storage... then turn these hardware thing into virtual constructs (hardware virtualization), but for 
+            the containers is a different stroy , instead of doing hardware virtualization, they do OS virtualization by claiming 
+            process tree, filesystem, network stacks... while the OS of the host machine is the one handling the hardware resources
+            not another prgram like hypervisor.
 
 OCI (Open Container Initiative) is set of rules that describe how should containers and images be build
     3 main rules of OCI:
