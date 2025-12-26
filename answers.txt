@@ -31,6 +31,11 @@ docker container: if the image is the template or the 'class' then container is 
             the containers is a different stroy , instead of doing hardware virtualization, they do OS virtualization by claiming 
             process tree, filesystem, network stacks... while the OS of the host machine is the one handling the hardware resources
             not another prgram like hypervisor.
+        - self-healing container policies:
+            - always: always restart failing containers if they aren't expicitly stopped by running "docker run --restart always"
+                or by declare it in yaml file to be used by higher level tools like docker compose 
+            - unless-stopped: in this mode the if the docker service got restarted unlike the always , the container will not start
+            - on-failure : it will restart the container if it exited with a non zero code or when the docker service restarted
 
 OCI (Open Container Initiative) is set of rules that describe how should containers and images be build
     3 main rules of OCI:
@@ -70,3 +75,12 @@ The OCI workflow
     it is possibile to go very low and run the "runc" command without docker or containerd.
 
 - cgroups are a kernel feature that allows you to allocate resources like tasks (CPU,RAM,GPU...)
+
+- containerization 
+    - containerization is about build, ship and run the end to end process and it can be done as next:
+        - create the app and dependacies
+        - create a Dockerfile to describe how to build the app and run it 
+        - build it into image running "docker build Dockerfile"
+        - run the container form the image
+    -Dockerfile : a plain text file that tells docker how to build an app into image by a set of instructions
+        
