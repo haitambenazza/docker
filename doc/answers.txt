@@ -11,15 +11,15 @@ docker image: it's a read only package that has everything to build the app, the
     the minimal OS, the dependacies , the app code and the config file, you can also say that images are stopped containers.
     - usually they are stored in /var/lib/docker/
     - to check for images in the local host : "docker images" or "docker image ls"
-    these images can be either built or pulled from registeries like DockerHub by running "docker pull <image>", also you can search 
+    these images can be either built or pulled from registeries like DockerHub by running "docker pull <image>", also you can search
     an image using "docker search <image>", you can inspect and see the layers of an image while pulling or running "docker insepct <image>"
-    deleting image: 
+    deleting image:
         - to delete an image we use "docker rmi <image>", however if an container uses that image it will not be deleted
         - to delete all the images on a host "docker rmi $(docker images -q) -f"
 
 docker container: if the image is the template or the 'class' then container is the instance, it's the runtime instance of an image
         - to start a container we run "docker run <image> <app/executable/script>" you can specify name with flag --name.
-            the container will run untill the main app exits, or by stoping it by running "docker stop <container ID>" 
+            the container will run untill the main app exits, or by stoping it by running "docker stop <container ID>"
             you can also remove a container by running "docker rm <container ID>"
 
         - so far we can define the container as next: container = Image(Read-only) + writtable Layer+ Isolated process
@@ -27,19 +27,19 @@ docker container: if the image is the template or the 'class' then container is 
             that's why we need to write them into volume.
         - difference between container and VM machine:
             - as we used to do with VM, the VM machine needs a host machine and a hypervisor, when the hypervisor boots it claims
-            all the CPU,RAM,storage... then turn these hardware thing into virtual constructs (hardware virtualization), but for 
-            the containers is a different stroy , instead of doing hardware virtualization, they do OS virtualization by claiming 
+            all the CPU,RAM,storage... then turn these hardware thing into virtual constructs (hardware virtualization), but for
+            the containers is a different stroy , instead of doing hardware virtualization, they do OS virtualization by claiming
             process tree, filesystem, network stacks... while the OS of the host machine is the one handling the hardware resources
             not another prgram like hypervisor.
         - self-healing container policies:
             - always: always restart failing containers if they aren't expicitly stopped by running "docker run --restart always"
-                or by declare it in yaml file to be used by higher level tools like docker compose 
+                or by declare it in yaml file to be used by higher level tools like docker compose
             - unless-stopped: in this mode the if the docker service got restarted unlike the always , the container will not start
             - on-failure : it will restart the container if it exited with a non zero code or when the docker service restarted
 
 OCI (Open Container Initiative) is set of rules that describe how should containers and images be build
     3 main rules of OCI:
-        - image specs: it define what should be inside a container image file 
+        - image specs: it define what should be inside a container image file
             - Manifest: a JSON file listing configs and layers
             - The Layers: Tarballs of the actual filesystem changes
             - The configs: a JSON file containing the env variables and the commands to run
@@ -48,16 +48,16 @@ OCI (Open Container Initiative) is set of rules that describe how should contain
 
 The OCI workflow
     - docker run nginx (docker engine or deamon finds the requested image by docker CLI)
-    - docker then tells containerD to handle the lifecycle, containerD pulls the The OCI image and pack it 
+    - docker then tells containerD to handle the lifecycle, containerD pulls the The OCI image and pack it
     into OCI bundle (a folder in the disk)
     - containerD calls runc to initiate the container
-    - runc reads the config.json from The OCI bundle then makes the syscalls needed to create namespaces the cgroups 
+    - runc reads the config.json from The OCI bundle then makes the syscalls needed to create namespaces the cgroups
 
 - containerD is a high-level runtime , it takes abstracted commands from docker (by Docker CLI) and turn them into OCI bundle for runc
     also it's the one that manage and monitor the running containers
     containerd has 3 responsabilities:
         - Image management: handles push and pull, communicate with registeries like DockerHub, download layers and store them into the disk
-        - Monitoring: it manages the "Union Filesystem" ,it's reads the layers from an image (Read-only),stack them on each and then add a 
+        - Monitoring: it manages the "Union Filesystem" ,it's reads the layers from an image (Read-only),stack them on each and then add a
         writable layer if the process tries to make a new file or to edit an existed one.
         - Execute runc: after preparing the layers, it run "runc", once runc exists the containerd leave a small process called shim to keep
         watching the running container and report if it crashes or existed with an error code.
@@ -67,7 +67,7 @@ The OCI workflow
     to transfrom the standard process into container (or isolated process)
     workflow of runc:
         - Read the config file: parse config.json to see which namespaces requested(PID, Network, Mount...).
-        - Create namespaces: uses unshare() to run the program in a new namespaces and clone() syscall to abstracts 
+        - Create namespaces: uses unshare() to run the program in a new namespaces and clone() syscall to abstracts
         the process from the rest (basically assigning PID 1).
         - setup Cgroups: writes new PID into cgroups.proc file a new created control blocks, basically handcuffing the process
         - remove the permissions: basically removes and strips down any previlidged commands or root power.
@@ -76,10 +76,10 @@ The OCI workflow
 
 - cgroups are a kernel feature that allows you to allocate resources like tasks (CPU,RAM,GPU...)
 
-- containerization 
+- containerization
     - containerization is about build, ship and run the end to end process and it can be done as next:
         - create the app and dependacies
-        - create a Dockerfile to describe how to build the app and run it 
+        - create a Dockerfile to describe how to build the app and run it
         - build it into image running "docker build image-name <build context>"
         - run the container form the image
     -Dockerfile : a plain text file that tells docker how to build an app into image by a set of instructions, it is a good pratice to keep
@@ -88,15 +88,19 @@ The OCI workflow
             - FROM : this instruction will pull the specified image and use it as base layer.
             - COPY: takes files from the host machine and copy them into the image.
             - ADD: same as COPY, but can add files from URLs or auto-extract .tar files into the image.
-            - RUN: creates a temporary container to run the specified command, and adds it to a new Read-only layer. 
+            - RUN: creates a temporary container to run the specified command, and adds it to a new Read-only layer.
         - Dockerfile Metadata setter(edits the image config JSON at runtime):
             - WORKDIR: Sets the the specified dir as current dir for any subsequence of RUN,COPY,ENTRYPOINT...
             - ENV: sets the env variables and inject them into the process env
-            - EXPOSE: this is only for documentation, it doesn't open any port, but just expicitly telling the user what port 
+            - EXPOSE: this is only for documentation, it doesn't open any port, but just expicitly telling the user what port
                 is expected to be opened.
-            - USER: a command to change permissions and UID before running a process , basically setting a default user for the 
+            - USER: a command to change permissions and UID before running a process , basically setting a default user for the
                 container
             - VOLUME: declare a specified directory as mount point, by marking it to be in the writable layer.
         - Dockerfile execution directives:
             - ENTRYPOINT: this will be the first binary that runc will exec, the process will become PID 1.
-            - CMD: the argument for ENTRYPOINT.  
+            - CMD: the argument for ENTRYPOINT.
+    - multi container:
+        - when trying to deploy and manage lot of microservices using only docker, it will takes lot of scripting and longer docker
+            commands, that's why we use docker compose in one config file.
+        - docker compose: a client-side tool
