@@ -80,7 +80,23 @@ The OCI workflow
     - containerization is about build, ship and run the end to end process and it can be done as next:
         - create the app and dependacies
         - create a Dockerfile to describe how to build the app and run it 
-        - build it into image running "docker build Dockerfile"
+        - build it into image running "docker build image-name <build context>"
         - run the container form the image
-    -Dockerfile : a plain text file that tells docker how to build an app into image by a set of instructions
-        
+    -Dockerfile : a plain text file that tells docker how to build an app into image by a set of instructions, it is a good pratice to keep
+        the Dockerfile in the build context (dir that hold the srcs).
+        - Dockerfile filesystem creators (creates layers):
+            - FROM : this instruction will pull the specified image and use it as base layer.
+            - COPY: takes files from the host machine and copy them into the image.
+            - ADD: same as COPY, but can add files from URLs or auto-extract .tar files into the image.
+            - RUN: creates a temporary container to run the specified command, and adds it to a new Read-only layer. 
+        - Dockerfile Metadata setter(edits the image config JSON at runtime):
+            - WORKDIR: Sets the the specified dir as current dir for any subsequence of RUN,COPY,ENTRYPOINT...
+            - ENV: sets the env variables and inject them into the process env
+            - EXPOSE: this is only for documentation, it doesn't open any port, but just expicitly telling the user what port 
+                is expected to be opened.
+            - USER: a command to change permissions and UID before running a process , basically setting a default user for the 
+                container
+            - VOLUME: declare a specified directory as mount point, by marking it to be in the writable layer.
+        - Dockerfile execution directives:
+            - ENTRYPOINT: this will be the first binary that runc will exec, the process will become PID 1.
+            - CMD: the argument for ENTRYPOINT.  
