@@ -103,4 +103,42 @@ The OCI workflow
     - multi container:
         - when trying to deploy and manage lot of microservices using only docker, it will takes lot of scripting and longer docker
             commands, that's why we use docker compose in one config file.
-        - docker compose: a client-side tool
+        - docker compose: a client-side tool that run and manage the containers (like Makefile), why should we use it?
+            well for many reasons rather than speeding up the deploying process, in inception Wordpress depends on mariadb
+            if Wordpress started before mariadb which might results on crash, for that compose uses a dependicy graph (depends_on)
+            to handle the order of execution of the containers, also in docker networking , when we want to connect containers with each other
+            we need manually run docker network create and each time before starting the container we need to specify the network
+            but with compose all these problems get solved.
+        - docker-compose.yaml: is a config file that tells how to build and run each service, a service may contian more than one
+            container.
+            - it has 3 major components:
+                - services: each entry in the services defines how to configure and run the service, when you run <up> it send a POST
+                    request to the docker engine API to create isolated PID namespaces
+                    - build: instead of pulling a pre-made image ,it called dockerfile specified in <dockerfile: path> from a context build
+                        specified in <context: path>
+                    - container_name: assign a name to the container
+                    - image: assign a name to the resulted image , if it doesn't exists docker builds it.
+                    - restart: defines the behavior when the process exits (always)
+                    - env_file: Points to the .env , docker reads the file and inject the password into the enviroment namespaces.
+                    - ports: <Host port: container port>
+                    - depends_on: defines order of execution
+                - networks: this section defines the virtual connection between the services.
+                    - driver: <bridge> tells the kernel to create a Linux bridge (virtual switch), all the containers in this
+                        network will get their own IP in a private network.
+                    - netwoks: (inside services) to plug a service in a specific port , you can put all the containers in virtual
+                        netwok and expose only the wanted service by giving it a port.
+                - volumes: link the temporary filesystem with local VM's disk.
+                    - driver: <local> tells docker to use local filesystem
+                    - driver_opt:
+                        - type: <none> don't use any special filesystem like NFS
+                        - device : <path> absolute path on VM host.
+                        - o: <bind> bind mount to staple the VM host folder in the container namespace.
+        docker compose commands:
+            docker compose up : it will read and parse the yaml file, use the dockerfiles to build images and start containers
+            docker compose stop: stop the containers and networks, won't delete them (SIGTERM)
+            docker compose down: stop the containers and networks and will delete them (make fclean)
+        docker volumes:
+            - volume: is presistence layer that we can use to store the data and not loosing it after removing the containers,
+                their seperated from containers.
+            - docker volume create: we can create a volume with this command but we might need to specify more flags
+                or simply specify it while running a container, --mount source=<vol>,target=<path in container>
