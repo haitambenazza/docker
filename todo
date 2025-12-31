@@ -1,15 +1,63 @@
 
-mkdir -p /var/lib/mysql
-ch
+# MariaDB setup for Inception (42)
+# Following 42 norm: minimal, robust, secure, well-documented
 
+## STEP 1: Prepare environment & secrets
+- [x] Secrets already in place: `secrets/db_password.txt` and `secrets/db_root_password.txt`
+- [ ] Ensure `.env` vars use strict naming: `DB_NAME`, `DB_USER` (no spaces around `=`)
+- [ ] Update `srcs/.env` if needed: `DB_NAME=database` and `DB_USER=user0`
 
-if [ !-d  ];then
-    start maria db
-    create database if not exist (script)
-    create user 
-    assign password to root
-    grant privileges to user 
-    flus privileges
-    stop maria
-fi
-exec mysqld_safe
+## STEP 2: Create initialization script
+- [ ] Create `srcs/requirements/mariadb/tools/init.sql` with idempotent SQL:
+      - Create database if not exists
+      - Create user if not exists
+      - Grant ALL privileges on database to user
+      - Remove anonymous users (42 security requirement)
+      - Set root password from secret
+
+## STEP 3: Fix Dockerfile (use custom image per 42 Inception)
+- [ ] Fix absolute paths: `COPY tools/mariadb.sh /usr/local/bin/mariadb.sh`
+- [ ] Fix chmod path: `RUN chmod +x /usr/local/bin/mariadb.sh`
+- [ ] Copy init.sql: `COPY tools/init.sql /tmp/init.sql`
+- [ ] Use `ENTRYPOINT` instead of `CMD` for proper PID 1 handling
+
+## STEP 4: Implement robust mariadb.sh entrypoint
+- [ ] Check if `/var/lib/mysql` exists; if not, create and initialize DB
+- [ ] Run `mysql_install_db --user=mysql --datadir=/var/lib/mysql` (first time only)
+- [ ] Start MariaDB temporarily to run init.sql
+- [ ] Read passwords from `/run/secrets/mariadb_secret_password` and `/run/secrets/root_mariadb_secret_password`
+- [ ] Execute init.sql to create DB and user
+- [ ] Stop temp MariaDB and `exec mysqld_safe` as PID 1
+- [ ] Ensure script returns proper exit codes and handles errors
+
+## STEP 5: Configure docker-compose.yaml
+- [ ] Add named volume: `volumes: - mariadb_data:/var/lib/mysql`
+- [ ] Add `volumes:` section at root level with `mariadb_data:`
+- [ ] Expose port: `ports: - "3306:3306"` (if host access needed)
+- [ ] Add healthcheck: `mysqladmin ping -u root -p$(cat /run/secrets/root_mariadb_secret_password)`
+- [ ] Keep secrets references as-is (already correct)
+
+## STEP 6: Verify file structure (42 cleanliness)
+- [ ] Ensure no unnecessary files in container
+- [ ] Check `.dockerignore` exists (create if needed)
+- [ ] Verify permissions on secret files (readable by root only: 400 or 600)
+
+## STEP 7: Test build and initialization
+- [ ] Run: `make build`
+- [ ] Check logs: `docker compose -f srcs/docker-compose.yaml logs -f mariadb`
+- [ ] Verify database created and user has privileges
+- [ ] Test persistence: stop/remove container, rebuild, confirm data persists
+
+## STEP 8: Test idempotency (42 robustness)
+- [ ] Recreate container: `docker compose -f srcs/docker-compose.yaml down -v` then `make build`
+- [ ] Verify no errors on re-initialization
+- [ ] Confirm DB and user still exist with correct privileges
+
+## STEP 9: Document (42 requirement: norm compliance doc)
+- [ ] Add inline comments to `mariadb.sh` explaining each step
+- [ ] Create brief `doc/MARIADB_SETUP.md` with:
+      - How to run (`make build`)
+      - How to verify (`docker compose logs mariadb`)
+      - How to reset data (`make re`)
+      - Secret file locations and usage
+      - Troubleshooting tips
