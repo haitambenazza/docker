@@ -1,0 +1,15 @@
+
+mkdir -p /var/lib/mysql
+ch
+
+
+if [ !-d  ];then
+    start maria db
+    create database if not exist (script)
+    create user 
+    assign password to root
+    grant privileges to user 
+    flus privileges
+    stop maria
+fi
+exec mysqld_safe

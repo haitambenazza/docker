@@ -1,0 +1,18 @@
+services:
+  mariadb:
+    build: requirements/mariadb/.
+    container_name: mariadb
+    image: mariadb:1.1
+    restart: always
+    env_file: .env
+    secrets: 
+      - mariadb_secret_password 
+      - root_mariadb_secret_password
+  # nginx:
+  # wordpress:
+
+secrets:
+  mariadb_secret_password:
+    file: ./../secrets/db_password.txt
+  root_mariadb_secret_password:
+    file: ./../secrets/db_root_password.txt
