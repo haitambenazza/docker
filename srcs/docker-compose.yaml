@@ -8,12 +8,38 @@ services:
     secrets: 
       - mariadb_secret_password 
       - root_mariadb_secret_password
+    volumes: 
+      - "/home/${USER}/data/mariadb:/var/lib/mysql"
+    # networks:
+    #   - my_network:
+    #     - aliases:
+    #       - "mariadb"
+
+    # wordpress:
+    #   build: requirements/wordpress/.
+    #   container_name: wordpress
+    #   image: wordpress:1.1
+    #   restart: always
+    #   env_file: .env
+    #   secrets: 
+    #     - wordpress_secret_password 
+    #     - root_wordpress_secret_password
+    #   volumes: 
+    #     - "/home/${USER}/data/wordpress:/var/www/html"
+    #   depends on:
+    #     - mariadb
+    #   networks:
+    #     - my_network:
+    #       - aliases:
+    #         - wordpress
   # nginx:
   # wordpress:
 
 # networks:
 #   - my_network
 
+networks:
+  my_network:
 secrets:
   mariadb_secret_password:
     file: ./../secrets/db_password.txt
