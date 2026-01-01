@@ -13,9 +13,9 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
     mariadb -u root  << EOF
 CREATE DATABASE IF NOT EXISTS \`${MARIADB_NAME}\`;
 CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${USER_PASSWD}';
-DROP USER ''@'localhost';
-DROP USER ''@*;
 GRANT ALL PRIVILEGES ON \`${MARIADB_NAME}\`.* TO '${DB_USER}'@'%';
+CREATE USER IF NOT EXISTS '${DB_USER}'@'localhost' IDENTIFIED BY '${USER_PASSWD}';
+GRANT ALL PRIVILEGES ON \`${MARIADB_NAME}\`.* TO '${DB_USER}'@'localhost';
 ALTER USER 'root'@'localhost' IDENTIFIED BY '${DB_ROOT_PASS}';
 FLUSH PRIVILEGES;
 EOF
