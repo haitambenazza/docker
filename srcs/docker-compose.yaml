@@ -11,6 +11,9 @@ services:
   # nginx:
   # wordpress:
 
+# networks:
+#   - my_network
+
 secrets:
   mariadb_secret_password:
     file: ./../secrets/db_password.txt
