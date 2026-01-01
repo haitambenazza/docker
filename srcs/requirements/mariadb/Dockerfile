@@ -10,4 +10,4 @@ RUN chmod +rw /etc/mysql/mariadb.conf.d
 RUN chmod +x /usr/local/bin/mariadb.sh
 RUN apt install iputils-ping -y
 
-CMD ["./usr/local/bin/mariadb.sh"]
+CMD ["/usr/local/bin/mariadb.sh"]

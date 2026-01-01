@@ -10,10 +10,10 @@ services:
       - root_mariadb_secret_password
     volumes: 
       - "/home/${USER}/data/mariadb:/var/lib/mysql"
-    # networks:
-    #   - my_network:
-    #     - aliases:
-    #       - "mariadb"
+    networks:
+      my_network:
+        aliases:
+          - mariadb
 
     # wordpress:
     #   build: requirements/wordpress/.
@@ -35,11 +35,10 @@ services:
   # nginx:
   # wordpress:
 
-# networks:
-#   - my_network
-
 networks:
   my_network:
+    driver: bridge
+
 secrets:
   mariadb_secret_password:
     file: ./../secrets/db_password.txt

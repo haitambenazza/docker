@@ -6,7 +6,7 @@
 #    By: oldsin <oldsin@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/12/30 18:42:06 by oldsin            #+#    #+#              #
-#    Updated: 2026/01/01 18:36:39 by oldsin           ###   ########.fr        #
+#    Updated: 2026/01/01 21:24:04 by oldsin           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -37,9 +37,11 @@ start:
 	@docker compose -f $(CONFIGFILE) start
 	
 down:
-	sudo rm -rf /home/$(LOGIN)/data/mariadb
 	@docker compose -f $(CONFIGFILE) down -v --rmi all
+	sudo rm -rf /home/$(LOGIN)/data/mariadb
 	
+rmi:
+	@docker rmi ${shell docker images -q}
 
 restart: stop start
 
