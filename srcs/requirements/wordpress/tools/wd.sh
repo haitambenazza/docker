@@ -44,4 +44,5 @@ else
     echo "WordPress already configured."
 fi
 
+echo "Running php fastCGI engine"
 exec php-fpm8.2 -F

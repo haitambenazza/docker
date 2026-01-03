@@ -1,4 +1,6 @@
-FROM debian:latest
+FROM debian:12
 
+RUN apt update -y && apt install nginx -y 
 
-VOLUME [ "/home/hbenazza/Desktop/docker/srcs/requirements/nginx" ]
+ENTRYPOINT [ "tail", "-f" ]
+

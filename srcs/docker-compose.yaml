@@ -33,9 +33,26 @@ services:
       my_network:
         aliases:
           - wordpress
+  nginx:
+    build: requirements/nginx/.
+    container_name: nginx
+    image: nginx:1.1
+    restart: always
+    env_file: .env
+    ports:
+      - "443:443"
+    depends_on:
+      - wordpress
+    volumes:
+      - wordpress_vol:/var/www/html
+    networks:
+      my_network:
+        aliases:
+          - nginx
 
 networks:
   my_network:
+    name: inception
     driver: bridge
 
 volumes:

@@ -11,19 +11,17 @@ echo "DB_USER: ${DB_USER}"
 # create dir for Unix socket for mariadb and set perms
 mkdir -p /run/mysqld
 chown -R mysql:mysql /run/mysqld
-chmod 755 /run/mysqld
 
-if [ ! -d "/var/lib/mysql/.init_test" ]; then
+if [ ! -f "/var/lib/mysql/.init_test" ]; then
     echo "Initializing data directory..."
     mkdir -p /var/lib/mysql
     chown -R mysql:mysql /var/lib/mysql
-    chmod 755 /var/lib/mysql
-    touch .init_test # creating a file so the volume will be empty 
     
     mysql_install_db --datadir=/var/lib/mysql/ --user=mysql
     
     mysqld --user=mysql --datadir=/var/lib/mysql --skip-networking &
     MYSQL_PID=$!
+    touch /var/lib/mysql/.init_test # creating a file so the volume will be empty 
     
     # Wait for mariadb/mysql to start
     while ! mysqladmin ping --silent; do

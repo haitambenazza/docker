@@ -6,7 +6,7 @@
 #    By: oldsin <oldsin@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/12/30 18:42:06 by oldsin            #+#    #+#              #
-#    Updated: 2026/01/03 13:35:52 by oldsin           ###   ########.fr        #
+#    Updated: 2026/01/03 16:10:46 by oldsin           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -33,6 +33,9 @@ mariadb:
 
 wordpress:
 	docker exec -it wordpress bash
+
+nginx:
+	docker exec -it nginx bash
 
 stop:
 	@docker compose -f $(CONFIGFILE) stop 
