@@ -8,4 +8,4 @@ RUN mv wp-cli.phar /usr/local/bin/wp
 COPY tools/wd.sh /usr/local/bin/wordpress.sh
 RUN chmod +x /usr/local/bin/wordpress.sh
 
-CMD ["tail", "-f"]
+CMD ["/usr/local/bin/wordpress.sh"]
