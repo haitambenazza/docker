@@ -6,7 +6,7 @@
 #    By: oldsin <oldsin@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/12/30 18:42:06 by oldsin            #+#    #+#              #
-#    Updated: 2026/01/02 23:45:05 by oldsin           ###   ########.fr        #
+#    Updated: 2026/01/03 04:03:24 by oldsin           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,7 +16,7 @@ LOGIN = ${USER}
 build:
 	sudo mkdir -p /home/$(LOGIN)/data/mariadb
 	sudo mkdir -p /home/$(LOGIN)/data/wordpress
-	docker compose -f $(CONFIGFILE) up -d --build
+	docker compose -f $(CONFIGFILE) up -d --build 
 
 status:
 	@echo "CONTAINERS STATS: -------"
@@ -41,9 +41,10 @@ start:
 	@docker compose -f $(CONFIGFILE) start
 	
 down:
-	@docker compose -f $(CONFIGFILE) down -v --rmi all
-	sudo rm -rf /home/$(LOGIN)/data/mariadb
-	sudo rm -rf /home/$(LOGIN)/data/wordpress
+	@docker compose -f $(CONFIGFILE) down --volumes --rmi all
+	@docker volume prune -af
+	sudo rm -rf  /home/$(LOGIN)/data/mariadb
+	sudo rm -rf	 /home/$(LOGIN)/data/wordpress
 	
 rmi:
 	@docker rmi ${shell docker images -q}

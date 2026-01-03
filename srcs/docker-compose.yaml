@@ -9,12 +9,12 @@ services:
       - mariadb_secret_password 
       - root_mariadb_secret_password
     volumes: 
-      -  /home/${USER}/data/mariadb:/var/lib/mysql
+      - /home/${USER}/data/mariadb:/var/lib/mysql
     networks:
       my_network:
         aliases:
           - mariadb
-
+  
   wordpress:
     build: requirements/wordpress/.
     container_name: wordpress
@@ -26,33 +26,34 @@ services:
       - root_wordpress_secret_password
       - wordpress_secret_password
     volumes: 
-      - /home/${USER}/data/wordpress:/var/www/html
+      - wordpress_vol:/var/www/html
     depends_on:
       - mariadb
     networks:
-       my_network:
-         aliases:
+      my_network:
+        aliases:
           - wordpress
-  # nginx:
-  # wordpress:
 
 networks:
   my_network:
     driver: bridge
 
-# volumes:
+volumes:
   # mariadb_vol:
+  #   driver: local
   #   name: mariadb_vol
   #   driver_opts:
   #     type: none
   #     o: bind
   #     device: /home/${USER}/data/mariadb
-  # wordpress_vol:
-  #   name: wordpress_vol
-  #   driver_opts:
-  #     type: none
-  #     o: bind
-  #     device: /home/${USER}/data/wordpress
+  
+  wordpress_vol:
+    driver: local
+    name: wordpress_vol
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/${USER}/data/wordpress
 
 
 secrets:
