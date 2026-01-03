@@ -9,7 +9,7 @@ services:
       - mariadb_secret_password 
       - root_mariadb_secret_password
     volumes: 
-      - /home/${USER}/data/mariadb:/var/lib/mysql
+      - mariadb_vol:/var/lib/mysql
     networks:
       my_network:
         aliases:
@@ -39,13 +39,13 @@ networks:
     driver: bridge
 
 volumes:
-  # mariadb_vol:
-  #   driver: local
-  #   name: mariadb_vol
-  #   driver_opts:
-  #     type: none
-  #     o: bind
-  #     device: /home/${USER}/data/mariadb
+  mariadb_vol:
+    driver: local
+    name: mariadb_vol
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/${USER}/data/mariadb
   
   wordpress_vol:
     driver: local
