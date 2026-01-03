@@ -6,7 +6,7 @@
 #    By: oldsin <oldsin@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/12/30 18:42:06 by oldsin            #+#    #+#              #
-#    Updated: 2026/01/03 16:10:46 by oldsin           ###   ########.fr        #
+#    Updated: 2026/01/03 20:53:03 by oldsin           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -50,6 +50,7 @@ down:
 	
 rmi:
 	@docker rmi ${shell docker images -q}
+
 
 restart: stop start
 

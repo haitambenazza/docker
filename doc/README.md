@@ -37,3 +37,4 @@ OCI runtime spec (runc) : https://opencontainers.org/posts/blog/2025-11-04-oci-r
 official github repo for OCI runtime spec : https://github.com/opencontainers/runtime-spec?tab=readme-ov-file <br>
 containerd vs docker : https://www.docker.com/blog/containerd-vs-docker/#:~:text=Containerd%20is%20a%20high%2Dlevel,level%20environments%20(including%20Kubernetes) <br>
 how to configure wordpress with a database : https://ubuntu.com/tutorials/install-and-configure-wordpress#1-overview <br>
+nginx guide : https://nginx.org/en/docs/beginners_guide.html<br>
