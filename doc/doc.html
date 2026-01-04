@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inception Documentation</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 20px; }
+        h1, h2, h3 { color: #333; }
+        code { background-color: #f4f4f4; padding: 2px 4px; border-radius: 4px; }
+        pre { background-color: #f4f4f4; padding: 10px; border-radius: 4px; overflow-x: auto; }
+        a { color: #007acc; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        ul { margin-left: 20px; }
+    </style>
+</head>
+<body>
+    <h1>INCEPTION</h1>
+    <p><em>This project has been created as part of the 42 curriculum by hbenazza</em></p>
+
+    <h2>Project Overview</h2>
+    <p>Inception is a Docker-based project that sets up a complete web infrastructure using containerization. It deploys a WordPress website with a MariaDB database and an Nginx web server, all orchestrated via Docker Compose. This project demonstrates the use of Docker for building, shipping, and running applications in isolated environments.</p>
+
+    <h2>Docker Fundamentals</h2>
+
+    <h3>What is Docker?</h3>
+    <p>Docker is a platform for developing, shipping, and running applications inside containers. Containers are lightweight, portable, and self-sufficient units that package an application and its dependencies.</p>
+
+    <h3>Why Docker?</h3>
+    <p>Docker simplifies the process of deploying applications by ensuring consistency across different environments. It eliminates issues like "it works on my machine" by packaging everything needed to run the application.</p>
+
+    <h3>How to Use Docker</h3>
+    <p>Docker uses commands like <code>docker build</code>, <code>docker run</code>, <code>docker pull</code>, etc., to manage images and containers.</p>
+
+    <h3>When to Use Docker</h3>
+    <p>Docker is ideal for microservices, continuous integration/deployment, and environments where isolation and portability are key.</p>
+
+    <h3>Docker vs Virtualization</h3>
+    <ul>
+        <li><strong>Virtualization</strong>: Uses a hypervisor to create virtual machines with full OS, leading to higher resource usage.</li>
+        <li><strong>Containers</strong>: Share the host OS kernel, making them more efficient and faster to start.</li>
+    </ul>
+
+    <h3>What is a Container?</h3>
+    <p>A container is a process tricked into thinking it's isolated. This isolation is achieved through three core primitives: namespaces, cgroups, and chroot.</p>
+
+    <h3>What is a Container Engine?</h3>
+    <p>A container engine is software that manages the lifecycle of containers, such as Docker Engine.</p>
+
+    <h3>How Does the Container Engine Isolate Processes?</h3>
+    <p>Isolation is done using namespaces (e.g., PID, network, mount) to separate processes, filesystems, and networks.</p>
+
+    <h3>Docker Runtime, Engine, and Orchestrator</h3>
+    <ul>
+        <li><strong>Runtime</strong>: Low-level component (e.g., runc) that creates and runs containers.</li>
+        <li><strong>Engine</strong>: The core software (Docker Engine) that includes API, image builder, and runtimes.</li>
+        <li><strong>Orchestrator</strong>: Tools like Docker Compose or Kubernetes for managing multiple containers.</li>
+    </ul>
+
+    <h3>Docker Levels</h3>
+    <p>Docker operates at multiple levels: high-level (containerd) and low-level (runc).</p>
+
+    <h3>How Docker Operates at Low and High Levels</h3>
+    <ul>
+        <li><strong>Low Level (runc)</strong>: Uses syscalls to create namespaces and cgroups.</li>
+        <li><strong>High Level (containerd)</strong>: Manages images, monitors containers, and interfaces with runc.</li>
+    </ul>
+
+    <h3>What is Dockerd?</h3>
+    <p>Dockerd is the Docker daemon, the background service that manages Docker objects like images, containers, networks, and volumes.</p>
+
+    <h3>What is a Docker Image?</h3>
+    <p>A Docker image is a read-only package containing the OS filesystem, application, and dependencies. Images are built from layers and can be stored in registries like Docker Hub.</p>
+
+    <h3>What is a Dockerfile?</h3>
+    <p>A Dockerfile is a plain text file that instructs Docker on how to build an image. It includes instructions like FROM, COPY, RUN, etc.</p>
+
+    <h3>How to Build an Image</h3>
+    <p>Use <code>docker build -t &lt;image_name&gt; &lt;context&gt;</code> to build an image from a Dockerfile.</p>
+
+    <h2>Docker Engine</h2>
+    <p>The Docker Engine is the software that runs and manages containers, often referred to simply as Docker. It consists of multiple components including the API, image builder, high-level runtime (containerd), and low-level runtime (runc).</p>
+    <p>When Docker was first released, it comprised two major components:</p>
+    <ul>
+        <li><strong>Docker Daemon (dockerd)</strong>: Contains code for the API, image builder, runtime, and more.</li>
+        <li><strong>LXC (Linux Containers)</strong>: A set of tools for creating system containers by combining namespaces and cgroups.</li>
+    </ul>
+    <p>However, after 2014, Docker replaced LXC with its own library called libcontainer (now part of runc), since LXC relied on Linux-based systems, limiting portability.</p>
+
+    <h2>Docker Image</h2>
+    <p>A Docker image is a read-only package that contains everything needed to build and run an application. Images are composed of stacked layers representing the minimal OS, dependencies, app code, and config files. Images can also be thought of as stopped containers.</p>
+    <ul>
+        <li><strong>Storage</strong>: Images are typically stored in <code>/var/lib/docker/</code>.</li>
+        <li><strong>Management Commands</strong>:
+            <ul>
+                <li>Check images: <code>docker images</code> or <code>docker image ls</code>.</li>
+                <li>Pull from registries: <code>docker pull &lt;image&gt;</code>.</li>
+                <li>Search images: <code>docker search &lt;image&gt;</code>.</li>
+                <li>Inspect layers: <code>docker inspect &lt;image&gt;</code>.</li>
+                <li>Delete image: <code>docker rmi &lt;image&gt;</code> (won't delete if a container uses it).</li>
+                <li>Delete all images: <code>docker rmi $(docker images -q) -f</code>.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h2>Docker Container</h2>
+    <p>If an image is the template or 'class', then a container is the instance— the runtime instance of an image.</p>
+    <ul>
+        <li><strong>Starting a Container</strong>: <code>docker run &lt;image&gt; &lt;app/executable/script&gt;</code>, optionally with <code>--name</code> for naming.</li>
+        <li><strong>Stopping</strong>: <code>docker stop &lt;container ID&gt;</code>.</li>
+        <li><strong>Removing</strong>: <code>docker rm &lt;container ID&gt;</code>.</li>
+    </ul>
+    <p>A container can be defined as: <strong>Container = Image (Read-only) + Writable Layer + Isolated Process</strong>.</p>
+    <p>The writable layer stores changes, but data is lost if the container stops or the process exits, necessitating volumes for persistence.</p>
+    <ul>
+        <li><strong>Difference from VM</strong>:
+            <ul>
+                <li>VMs require a host machine and hypervisor, which claims all CPU, RAM, storage, and creates virtual hardware constructs (hardware virtualization).</li>
+                <li>Containers perform OS virtualization by isolating process trees, filesystems, and network stacks, while the host OS handles hardware resources directly, without a hypervisor.</li>
+            </ul>
+        </li>
+        <li><strong>Self-Healing Policies</strong>:
+            <ul>
+                <li><strong>always</strong>: Always restart failing containers unless explicitly stopped (<code>docker run --restart always</code> or in YAML).</li>
+                <li><strong>unless-stopped</strong>: If Docker service restarts, containers won't start automatically.</li>
+                <li><strong>on-failure</strong>: Restart only if exited with non-zero code or on service restart.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h2>OCI (Open Container Initiative)</h2>
+    <p>OCI is a set of standards describing how containers and images should be built.</p>
+    <p><strong>Three Main Specifications</strong>:</p>
+    <ul>
+        <li><strong>Image Specs</strong>: Defines the structure of container image files.
+            <ul>
+                <li><strong>Manifest</strong>: A JSON file listing configs and layers.</li>
+                <li><strong>Layers</strong>: Tarballs of actual filesystem changes.</li>
+                <li><strong>Configs</strong>: A JSON file with environment variables and commands to run.</li>
+            </ul>
+        </li>
+        <li><strong>Runtime Specs</strong>: Defines how containers are started and managed.</li>
+        <li><strong>Distribution Specs</strong>: Describes pushing and pulling images from registries like Docker Hub.</li>
+    </ul>
+
+    <h2>OCI Workflow</h2>
+    <ol>
+        <li><code>docker run nginx</code>: Docker Engine (daemon) finds the requested image via Docker CLI.</li>
+        <li>Docker tells containerd to handle the lifecycle; containerd pulls the OCI image and packs it into an OCI bundle (a folder on disk).</li>
+        <li>Containerd calls runc to initiate the container.</li>
+        <li>Runc reads <code>config.json</code> from the OCI bundle and makes syscalls to create namespaces and cgroups.</li>
+    </ol>
+
+    <h2>Containerd</h2>
+    <p>Containerd is a high-level runtime that takes abstracted commands from Docker (via Docker CLI) and converts them into OCI bundles for runc. It also manages and monitors running containers.</p>
+    <p><strong>Three Responsibilities</strong>:</p>
+    <ul>
+        <li><strong>Image Management</strong>: Handles push/pull, communicates with registries like Docker Hub, downloads layers, and stores them on disk.</li>
+        <li><strong>Monitoring</strong>: Manages the "Union Filesystem"—reads layers from the image (read-only), stacks them, and adds a writable layer for new or edited files.</li>
+        <li><strong>Execute Runc</strong>: Prepares layers, runs <code>runc</code>; once runc exits, containerd leaves a small shim process to watch the container and report crashes or errors.</li>
+        <li><strong>Metadata</strong>: Tracks running containers, their IDs, and associated images.</li>
+    </ul>
+
+    <h2>Runc</h2>
+    <p>Runc is a standalone CLI tool for running containers according to OCI runtime specs, using syscalls like <code>clone()</code>, <code>pivot_root()</code>, etc., to transform a standard process into an isolated container.</p>
+    <p><strong>Workflow</strong>:</p>
+    <ol>
+        <li><strong>Read Config File</strong>: Parses <code>config.json</code> to determine requested namespaces (PID, Network, Mount, etc.).</li>
+        <li><strong>Create Namespaces</strong>: Uses <code>unshare()</code> to run the program in new namespaces and <code>clone()</code> syscall to isolate the process (assigning PID 1).</li>
+        <li><strong>Setup Cgroups</strong>: Writes the new PID into <code>cgroups.proc</code> file in created control blocks, effectively "handcuffing" the process to resource limits.</li>
+        <li><strong>Remove Permissions</strong>: Strips down privileged commands or root powers.</li>
+        <li><strong>Exec</strong>: Replaces itself with the actual command to execute.</li>
+    </ol>
+    <p>It's possible to run <code>runc</code> directly without Docker or containerd for low-level operations.</p>
+
+    <h2>Cgroups</h2>
+    <p>Cgroups (Control Groups) are a kernel feature for allocating resources to tasks, such as CPU, RAM, GPU, etc. They allow fine-grained control over resource usage by processes.</p>
+
+    <h2>Containerization</h2>
+    <p>Containerization is the process of building, shipping, and running applications end-to-end:</p>
+    <ol>
+        <li>Create the app and dependencies.</li>
+        <li>Write a Dockerfile to describe building and running the app.</li>
+        <li>Build into an image: <code>docker build &lt;image-name&gt; &lt;build-context&gt;</code>.</li>
+        <li>Run the container from the image.</li>
+    </ol>
+
+    <h3>Dockerfile</h3>
+    <p>A Dockerfile is a plain text file instructing Docker how to build an app into an image using instructions. It's best practice to place it in the build context (directory holding sources).</p>
+    <ul>
+        <li><strong>Filesystem Creators (Create Layers)</strong>:
+            <ul>
+                <li><strong>FROM</strong>: Pulls the specified image as the base layer.</li>
+                <li><strong>COPY</strong>: Copies files from the host into the image.</li>
+                <li><strong>ADD</strong>: Similar to COPY, but can add files from URLs or auto-extract .tar files.</li>
+                <li><strong>RUN</strong>: Creates a temporary container to run commands, adding results to a new read-only layer.</li>
+            </ul>
+        </li>
+        <li><strong>Metadata Setters (Edit Image Config JSON at Runtime)</strong>:
+            <ul>
+                <li><strong>WORKDIR</strong>: Sets the specified directory as the current directory for subsequent RUN, COPY, ENTRYPOINT, etc.</li>
+                <li><strong>ENV</strong>: Sets environment variables injected into the process environment.</li>
+                <li><strong>EXPOSE</strong>: Documentation only; doesn't open ports but indicates expected ports.</li>
+                <li><strong>USER</strong>: Changes permissions and UID before running processes, setting a default user.</li>
+                <li><strong>VOLUME</strong>: Declares directories as mount points, marking them in the writable layer.</li>
+            </ul>
+        </li>
+        <li><strong>Execution Directives</strong>:
+            <ul>
+                <li><strong>ENTRYPOINT</strong>: The first binary runc executes; the process becomes PID 1.</li>
+                <li><strong>CMD</strong>: Arguments for ENTRYPOINT.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h2>Multi-Container with Docker Compose</h2>
+    <p>Deploying and managing multiple microservices with raw Docker requires extensive scripting and long commands. Docker Compose solves this with a single config file.</p>
+    <p><strong>Why Use Docker Compose?</strong></p>
+    <ul>
+        <li>Speeds up deployment.</li>
+        <li>Handles dependencies (e.g., WordPress depends on MariaDB; Compose uses a dependency graph with <code>depends_on</code> to prevent crashes).</li>
+        <li>Manages networking: Instead of manual <code>docker network create</code>, Compose handles virtual networks automatically.</li>
+    </ul>
+
+    <h3>docker-compose.yaml</h3>
+    <p>A config file specifying how to build and run services (a service may include multiple containers).</p>
+    <p><strong>Three Major Components</strong>:</p>
+    <ul>
+        <li><strong>Services</strong>: Each entry defines service configuration and runtime. Running <code>up</code> sends POST requests to the Docker Engine API to create isolated PID namespaces.
+            <ul>
+                <li><strong>build</strong>: Instead of pulling pre-made images, specifies Dockerfile path and build context.</li>
+                <li><strong>container_name</strong>: Assigns a name to the container.</li>
+                <li><strong>image</strong>: Names the resulting image; Docker builds if it doesn't exist.</li>
+                <li><strong>restart</strong>: Defines behavior on process exit (e.g., <code>always</code>).</li>
+                <li><strong>env_file</strong>: Points to .env file; Docker injects passwords into environment namespaces.</li>
+                <li><strong>ports</strong>: <code>&lt;Host port&gt;:&lt;Container port&gt;</code>.</li>
+                <li><strong>depends_on</strong>: Defines execution order.</li>
+            </ul>
+        </li>
+        <li><strong>Networks</strong>: Defines virtual connections between services.
+            <ul>
+                <li><strong>driver</strong>: <code>&lt;bridge&gt;</code> creates a Linux bridge (virtual switch); containers get IPs in a private network.</li>
+                <li><strong>networks</strong> (in services): Plugs services into specific networks, exposing only desired services via ports.</li>
+            </ul>
+        </li>
+        <li><strong>Volumes</strong>: Links temporary filesystem to local VM disk.
+            <ul>
+                <li><strong>driver</strong>: <code>&lt;local&gt;</code> uses local filesystem.</li>
+                <li><strong>driver_opts</strong>:
+                    <ul>
+                        <li><strong>type</strong>: <code>&lt;none&gt;</code> (no special filesystem like NFS).</li>
+                        <li><strong>device</strong>: Absolute path on VM host.</li>
+                        <li><strong>o</strong>: <code>&lt;bind&gt;</code> for bind mount, stapling VM host folder into container namespace.</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+    </ul>
+    <p><strong>Docker Compose Commands</strong>:</p>
+    <ul>
+        <li><code>docker compose up</code>: Reads/parses YAML, builds images from Dockerfiles, starts containers.</li>
+        <li><code>docker compose stop</code>: Stops containers and networks without deleting (SIGTERM).</li>
+        <li><code>docker compose down</code>: Stops containers/networks and deletes them (like <code>make fclean</code>).</li>
+    </ul>
+
+    <h2>Docker Volumes</h2>
+    <p>Volumes are a persistence layer for storing data without losing it upon container removal. They are separate from containers.</p>
+    <ul>
+        <li><strong>Creation</strong>: <code>docker volume create</code> (may need flags), or specify during <code>docker run</code> with <code>--mount source=&lt;vol&gt;,target=&lt;path in container&gt;</code>.</li>
+    </ul>
+
+    <h2>Project Structure</h2>
+    <pre>
+Makefile
+secrets/
+    credentials.txt
+    db_password.txt
+    db_root_password.txt
+    root_wd_passwd.txt
+    wordpress_passwd.txt
+srcs/
+    docker-compose.yaml
+    requirements/
+        mariadb/
+            Dockerfile
+            tools/
+                50-server.cnf
+                mariadb.sh
+        nginx/
+            Dockerfile
+            tools/
+                nginx.conf
+                script.sh
+        wordpress/
+            Dockerfile
+            tools/
+                wd.sh
+                www.conf
+    </pre>
+
+    <h2>Installation and Usage</h2>
+    <ol>
+        <li>Ensure Docker and Docker Compose are installed.</li>
+        <li>Clone the repository.</li>
+        <li>Navigate to <code>srcs/</code>.</li>
+        <li>Run <code>docker compose up --build</code> to start the services.</li>
+        <li>Access WordPress at <code>http://localhost</code> (adjust ports as needed).</li>
+        <li>Use <code>docker compose down</code> to stop and remove containers.</li>
+    </ol>
+
+    <h2>Resources</h2>
+    <ul>
+        <li>Docker Deep Dive: <a href="http://103.203.175.90:81/fdScript/RootOfEBooks/E%20Book%20collection%20-%202024%20-%20D/CSE%20%20IT%20AIDS%20ML/Docker%20Deep%20Dive.pdf">Link</a></li>
+        <li>Container Unplugged: <a href="https://medium.com/@a.kanojiya2003/container-unplugged-how-docker-utilizes-linux-namespaces-and-chroot-2dd87d133a53">Link</a></li>
+        <li>Docker in Action: <a href="https://pepa.holla.cz/wp-content/uploads/2016/10/Docker-in-Action.pdf">Link</a></li>
+        <li>OCI Runtime Spec: <a href="https://opencontainers.org/posts/blog/2025-11-04-oci-runtime-spec-v1-3/">Link</a></li>
+        <li>OCI Runtime Spec Repo: <a href="https://github.com/opencontainers/runtime-spec?tab=readme-ov-file">Link</a></li>
+        <li>Containerd vs Docker: <a href="https://www.docker.com/blog/containerd-vs-docker/">Link</a></li>
+        <li>Configure WordPress with Database: <a href="https://ubuntu.com/tutorials/install-and-configure-wordpress#1-overview">Link</a></li>
+        <li>Nginx Guide: <a href="https://nginx.org/en/docs/beginners_guide.html">Link</a></li>
+    </ul>
+</body>
+</html>
