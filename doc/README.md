@@ -235,6 +235,288 @@ Volumes are a persistence layer for storing data without losing it upon containe
 
 - **Creation**: `docker volume create` (may need flags), or specify during `docker run` with `--mount source=<vol>,target=<path in container>`.
 
+## MariaDB
+
+MariaDB is a relational database management system (RDBMS) that is a drop-in replacement for MySQL. It stores structured data in tables and is designed to handle complex queries efficiently.
+
+### What is MariaDB?
+
+MariaDB is an open-source relational database that uses SQL (Structured Query Language) for managing data. It's faster, more reliable, and more compatible than its predecessor, making it ideal for web applications like WordPress.
+
+### MariaDB Configuration in Inception
+
+In the Inception project, MariaDB is deployed as a separate container with the following configuration:
+
+- **Dockerfile Location**: `srcs/requirements/mariadb/Dockerfile`
+  - Base image: Alpine Linux (lightweight OS)
+  - Installs MariaDB server and client
+  - Sets up service initialization scripts
+
+- **Configuration Files** (`srcs/requirements/mariadb/tools/`):
+  - **50-server.cnf**: MariaDB server configuration file that customizes database behavior (port, memory settings, character set, etc.)
+  - **mariadb.sh**: Initialization script that runs when the container starts, setting up databases, users, and permissions
+
+- **Environment Variables**: Database root password, WordPress user credentials stored in environment files
+
+- **Volume Mount**: Database data is persisted in a Docker volume to prevent data loss when the container restarts
+
+### MariaDB Role in Inception
+
+MariaDB stores all WordPress data including:
+- Posts, pages, and comments
+- User accounts and permissions
+- Plugin and theme information
+- Site configuration
+
+It runs on port 3306 (internal to the Docker network, not exposed to the host) and communicates with WordPress via network isolation provided by Docker Compose.
+
+## Nginx
+
+Nginx is a lightweight, high-performance web server and reverse proxy server. It's designed to handle high concurrency and efficiently serve static files while routing requests to backend applications.
+
+### What is Nginx?
+
+Nginx (pronounced "engine-x") is an open-source web server that can also function as a reverse proxy, load balancer, and HTTP cache. Unlike traditional web servers, Nginx uses an event-driven architecture, making it extremely efficient for serving web content and handling multiple concurrent connections.
+
+### Nginx Configuration in Inception
+
+In the Inception project, Nginx serves as the entry point for all web traffic:
+
+- **Dockerfile Location**: `srcs/requirements/nginx/Dockerfile`
+  - Base image: Alpine Linux
+  - Installs Nginx web server
+  - Configures SSL/TLS for HTTPS support
+  - Installs necessary dependencies
+
+- **Configuration Files** (`srcs/requirements/nginx/tools/`):
+  - **nginx.conf**: Main Nginx configuration file that:
+    - Listens on port 443 (HTTPS) and redirects HTTP to HTTPS
+    - Defines server blocks (virtual hosts)
+    - Configures SSL certificates and keys
+    - Sets up upstream connections to the WordPress PHP-FPM container
+    - Defines URL rewriting rules for WordPress
+  - **script.sh**: Startup script that generates SSL certificates and initializes Nginx
+
+- **Port Exposure**: Port 443 (HTTPS) is exposed to the host, allowing external access to the website
+
+- **Reverse Proxy Configuration**: Routes PHP requests to the WordPress container running PHP-FPM
+
+### Nginx Role in Inception
+
+Nginx acts as the web server and gateway:
+- Accepts incoming HTTP/HTTPS requests from clients
+- Serves static files (CSS, JavaScript, images) directly
+- Routes PHP requests to the WordPress PHP-FPM container
+- Enforces SSL/TLS encryption for secure communication
+- Handles URL rewriting for WordPress clean URLs
+- Acts as a load balancer and proxy between clients and backend services
+
+## WordPress
+
+WordPress is a free, open-source content management system (CMS) built on PHP. It allows users to create and manage websites without coding knowledge while providing a flexible framework for developers.
+
+### What is WordPress?
+
+WordPress is a PHP-based CMS that runs on a web server and communicates with a database to manage website content. It provides:
+- An intuitive admin dashboard for content management
+- Themes for customizing appearance
+- Plugins for extending functionality
+- User role management
+- SEO-friendly features
+
+### What is PHP-FPM?
+
+PHP-FPM (FastCGI Process Manager) is a PHP application server that processes PHP code and returns the output to the web server. Unlike traditional CGI, FPM uses persistent processes to handle requests more efficiently.
+
+### WordPress Configuration in Inception
+
+In the Inception project, WordPress runs with PHP-FPM in a separate container:
+
+- **Dockerfile Location**: `srcs/requirements/wordpress/Dockerfile`
+  - Base image: Alpine Linux
+  - Installs PHP and PHP-FPM with necessary extensions
+  - Installs WordPress core files
+  - Sets up service initialization scripts
+
+- **Configuration Files** (`srcs/requirements/wordpress/tools/`):
+  - **www.conf**: PHP-FPM pool configuration that:
+    - Sets up the FPM listen address and port (usually 9000)
+    - Configures process management (number of workers, timeouts)
+    - Sets permissions and user/group for PHP processes
+  - **wd.sh**: WordPress initialization script that:
+    - Downloads and sets up WordPress if not already installed
+    - Configures `wp-config.php` with database connection details
+    - Creates WordPress database and user
+    - Installs default WordPress configuration
+
+- **Environment Variables**: Database name, user, password, and WordPress admin credentials
+
+- **Volume Mount**: WordPress files and configuration are persisted in a Docker volume
+
+### WordPress Role in Inception
+
+WordPress is the application layer:
+- Provides the CMS interface for content management
+- Processes user requests through PHP
+- Communicates with MariaDB for data storage and retrieval
+- Receives requests from Nginx (the web server)
+- Generates dynamic HTML content to send back through Nginx
+
+## How MariaDB, Nginx, and WordPress Work Together
+
+The Inception project demonstrates a classic three-tier web architecture:
+
+### Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────┐
+│                   Client/Browser                     │
+│              (requests http/https)                   │
+└────────────────────┬────────────────────────────────┘
+                     │
+        ┌────────────▼────────────┐
+        │   Nginx Container       │
+        │   (Web Server)          │
+        │   Port: 443 (HTTPS)     │
+        │   Serves static files   │
+        │   Routes to PHP-FPM     │
+        └────────────┬────────────┘
+                     │
+                     │ Communication via
+                     │ Docker Network
+                     │
+        ┌────────────▼─────────────────┐
+        │  WordPress Container        │
+        │  (PHP-FPM Application)      │
+        │  Port: 9000 (Internal)      │
+        │  Executes PHP Code          │
+        │  Queries Database           │
+        └────────────┬─────────────────┘
+                     │
+                     │ Communication via
+                     │ Docker Network
+                     │
+        ┌────────────▼────────────┐
+        │  MariaDB Container      │
+        │  (Database Server)      │
+        │  Port: 3306 (Internal)  │
+        │  Stores Data             │
+        └─────────────────────────┘
+```
+
+### Request Flow
+
+1. **Client Request**: A user types a URL in their browser and sends an HTTPS request to port 443
+
+2. **Nginx Receives Request**: The Nginx container receives the incoming request on port 443
+   - Verifies SSL/TLS certificate
+   - Checks if it's a static file (CSS, JS, images) → serves directly
+   - If it's a dynamic page (PHP) → forwards to WordPress PHP-FPM
+
+3. **WordPress Processes Request**: PHP-FPM receives the request and executes the appropriate PHP code
+   - Parses the URL and determines which WordPress code to run
+   - May need to fetch data from the database
+   - Sends a query to MariaDB via the Docker network
+
+4. **MariaDB Queries Data**: MariaDB receives the query from WordPress
+   - Searches and retrieves the requested data
+   - Returns the results back to WordPress
+
+5. **WordPress Generates Response**: WordPress receives data from MariaDB
+   - Processes the PHP logic (building the page dynamically)
+   - Generates HTML content
+   - Sends the HTML back to Nginx
+
+6. **Nginx Delivers Response**: Nginx receives the HTML from PHP-FPM
+   - Wraps it in HTTP headers
+   - Sends it back through the secure HTTPS connection to the client
+
+7. **Browser Renders**: The client browser receives the HTML
+   - Parses HTML, CSS, JavaScript
+   - Renders the webpage for the user
+
+### Docker Compose Configuration
+
+The three services are orchestrated together via `docker-compose.yaml`:
+
+```yaml
+services:
+  mariadb:
+    build: ./requirements/mariadb
+    container_name: mariadb
+    env_file: ../.env
+    volumes:
+      - mariadb_volume:/var/lib/mysql
+    networks:
+      - inception_network
+    restart: always
+
+  wordpress:
+    build: ./requirements/wordpress
+    container_name: wordpress
+    depends_on:
+      - mariadb  # WordPress waits for MariaDB to be ready
+    env_file: ../.env
+    volumes:
+      - wordpress_volume:/var/www/html
+    networks:
+      - inception_network
+    restart: always
+
+  nginx:
+    build: ./requirements/nginx
+    container_name: nginx
+    depends_on:
+      - wordpress  # Nginx waits for WordPress to be ready
+    ports:
+      - "443:443"  # Only Nginx port is exposed
+    networks:
+      - inception_network
+    restart: always
+
+networks:
+  inception_network:
+    driver: bridge  # Creates an isolated virtual network
+
+volumes:
+  mariadb_volume:
+    driver: local
+  wordpress_volume:
+    driver: local
+```
+
+### Key Connection Points
+
+**Nginx ↔ WordPress Communication**:
+- Nginx forwards PHP requests to WordPress via TCP socket (port 9000)
+- Configured in `nginx.conf` with: `fastcgi_pass wordpress:9000;`
+- Uses container DNS resolution (Docker automatically resolves "wordpress" to the correct IP)
+
+**WordPress ↔ MariaDB Communication**:
+- WordPress connects to MariaDB using environment variables for credentials
+- Connection string format: `mysql://user:password@mariadb:3306/database_name`
+- MariaDB hostname is simply "mariadb" (Docker's internal DNS)
+
+**Network Isolation**:
+- All three containers run on the same Docker bridge network (`inception_network`)
+- Services can communicate using container names as hostnames
+- Only Nginx port (443) is exposed to the host; MariaDB and WordPress are internal
+- This improves security: database is never directly accessible from outside
+
+### Data Persistence
+
+- **MariaDB Volume**: `/var/lib/mysql` is mounted to a persistent volume, so databases survive container restarts
+- **WordPress Volume**: `/var/www/html` contains WordPress files and user uploads, also persisted
+
+### Dependency Management
+
+Docker Compose's `depends_on` ensures proper startup order:
+1. MariaDB starts first (WordPress depends on it)
+2. WordPress starts second (Nginx depends on it)
+3. Nginx starts last
+
+This prevents race conditions where services try to connect before their dependencies are ready.
+
 ## Project Structure
 
 ```
