@@ -1,6 +1,6 @@
 FROM debian:12
 
-RUN apt update -y && apt install nginx openssl -y 
+RUN apt update -y && apt install nginx openssl iputils-ping  -y 
 
 COPY tools/nginx.conf /etc/nginx/conf.d
 COPY tools/script.sh /usr/local/bin/script.sh

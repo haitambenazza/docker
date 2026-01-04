@@ -1,6 +1,6 @@
 FROM debian:12
 
-RUN apt update -y && apt install php-fpm php-mysql mariadb-client curl iputils-ping -y
+RUN apt update -y && apt install php-fpm php-mysql mariadb-client curl iputils-ping iproute2 -y
 COPY tools/www.conf /etc/php/8.2/fpm/pool.d/www.conf
 RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 RUN chmod +x wp-cli.phar
