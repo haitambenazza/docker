@@ -1,5 +1,3 @@
-# INCEPTION
-
 *This project has been created as part of the 42 curriculum by hbenazza*
 
 ## Project Overview
@@ -31,7 +29,9 @@ Docker is ideal for microservices, continuous integration/deployment, and enviro
 
 ### What is a Container?
 
-A container is a process tricked into thinking it's isolated. This isolation is achieved through three core primitives: namespaces, cgroups, and chroot.
+A container is a process tricked into thinking it's isolated. This isolation is achieved through two core primitives: namespaces, cgroups.
+
+so in another word, container = process + image(ReADonly layer) + writable layer
 
 ### What is a Container Engine?
 
@@ -248,7 +248,7 @@ MariaDB is an open-source relational database that uses SQL (Structured Query La
 In the Inception project, MariaDB is deployed as a separate container with the following configuration:
 
 - **Dockerfile Location**: `srcs/requirements/mariadb/Dockerfile`
-  - Base image: Alpine Linux (lightweight OS)
+  - Base image: debian 12 Linux (lightweight OS)
   - Installs MariaDB server and client
   - Sets up service initialization scripts
 
@@ -283,7 +283,7 @@ Nginx (pronounced "engine-x") is an open-source web server that can also functio
 In the Inception project, Nginx serves as the entry point for all web traffic:
 
 - **Dockerfile Location**: `srcs/requirements/nginx/Dockerfile`
-  - Base image: Alpine Linux
+  - Base image: debian 12 Linux
   - Installs Nginx web server
   - Configures SSL/TLS for HTTPS support
   - Installs necessary dependencies
@@ -333,7 +333,7 @@ PHP-FPM (FastCGI Process Manager) is a PHP application server that processes PHP
 In the Inception project, WordPress runs with PHP-FPM in a separate container:
 
 - **Dockerfile Location**: `srcs/requirements/wordpress/Dockerfile`
-  - Base image: Alpine Linux
+  - Base image: debian 12 Linux
   - Installs PHP and PHP-FPM with necessary extensions
   - Installs WordPress core files
   - Sets up service initialization scripts
@@ -521,11 +521,9 @@ This prevents race conditions where services try to connect before their depende
 
 ```
 Makefile
-doc/
-    answers.txt
-    DEV_DOC.md
-    README.md
-    USER_DOC.md
+DEV_DOC.md
+README.md
+USER_DOC.md
 secrets/
     credentials.txt
     db_password.txt
@@ -534,6 +532,7 @@ secrets/
     wordpress_passwd.txt
 srcs/
     docker-compose.yaml
+    .env
     requirements/
         mariadb/
             Dockerfile
@@ -543,6 +542,7 @@ srcs/
         nginx/
             Dockerfile
             tools/
+                doc.html
                 nginx.conf
                 script.sh
         wordpress/
@@ -571,3 +571,9 @@ srcs/
 - Containerd vs Docker: [Link](https://www.docker.com/blog/containerd-vs-docker/)
 - Configure WordPress with Database: [Link](https://ubuntu.com/tutorials/install-and-configure-wordpress#1-overview)
 - Nginx Guide: [Link](https://nginx.org/en/docs/beginners_guide.html)
+
+## AI usage
+  - providing some good resources and link for setting up the services
+  - help with debugging nginx container
+  - providing tips and good practices for writing a Dockerfile
+  - formatting and checking synatx of documentation

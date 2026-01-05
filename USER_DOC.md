@@ -1,4 +1,4 @@
-# WordPress User Documentation
+*This project has been created as part of the 42 curriculum by hbenazza*
 
 ## Overview
 
@@ -46,54 +46,3 @@ Visit `https://hbenazza.42.fr` to see your public WordPress site
 3. Set user roles (Administrator, Editor, Author, Contributor, Subscriber)
 4. Each role has different permission levels
 
-## Site Settings
-
-### General Settings
-- **Site Title**: Your website name
-- **Tagline**: Your site's motto
-- **WordPress Address & Site Address**: URLs for your site
-- **Timezone**: Set your local timezone
-
-Access via **Settings** → **General**
-
-### Appearance
-- **Themes**: Choose and customize your site's look
-- **Widgets**: Add widgets to sidebars
-- **Menus**: Create and manage navigation menus
-
-## Plugins
-
-Plugins extend WordPress functionality. To manage plugins:
-1. Go to **Plugins** in the admin menu
-2. Activate/deactivate plugins as needed
-3. Use **Add New** to search and install plugins
-
-## Troubleshooting
-
-### Can't Access WordPress
-- Ensure the container is running: `docker-compose up`
-- Check your internet connection
-- Verify the domain in your hosts file
-
-### Posts Not Showing
-- Check if posts are published (not in draft)
-- Verify categories and tags are assigned
-- Clear your browser cache
-
-### Slow Performance
-- Check available server resources
-- Optimize images before uploading
-- Disable unused plugins
-
-## Important Notes
-
-- Always keep WordPress and plugins updated
-- Regularly backup your content
-- Use strong passwords for user accounts
-- Be cautious with admin account permissions
-
-## Support
-
-For more information about WordPress, visit the official documentation:
-- [WordPress.org](https://wordpress.org)
-- [WordPress Support](https://wordpress.org/support/)
