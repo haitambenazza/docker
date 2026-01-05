@@ -27,7 +27,7 @@ if [ ! -f "${DIR}/wp-config.php" ]; then
         --dbhost=${DB_HOST}:${DB_PORT}
     
     wp core install --allow-root \
-        --url=${DOMAIN_NAME}:443 \
+        --url=${DOMAIN_NAME} \
         --title="${SITE_TITLE}" \
         --admin_user=${WP_ADMIN_USER} \
         --admin_password=${WP_ADMIN_PASS} \
